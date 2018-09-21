@@ -1,0 +1,104 @@
+//xp
+bot.on('message' , message => {
+
+    var msgauthor = message.author.id;
+
+    if(message.author.bot)return;
+
+    if(!db.get("inventory").find({user: msgauthor}).value()){
+        db.get("inventory").push({user: msgauthor, items: "Vide"}).write();
+    }
+
+    if(message.author.bot)return;
+
+    if(!db.get("xp").find({user: msgauthor}).value()){
+        db.get("xp").push({user: msgauthor, xp: 5}).write();
+    }else{
+        var userxpdb = db.get("xp").filter({user: msgauthor}).find('xp').value();
+        console.log(userxpdb);
+        var userxp = Object.values(userxpdb)
+        console.log(userxp);
+        console.log(`Nombre d'xp : ${userxp[1]}`)
+
+        db.get("xp").find({user: msgauthor}).assign({user: msgauthor, xp: userxp[1] += 5}).write();
+
+        if (message.content === prefix + "xpstat"){
+            var xp = db.get("xp").filter({user: msgauthor}).find('xp').value() 
+            var xpfinal = Object.values(xp); 
+            var xp_embed = new Discord.RichEmbed()
+                .setColor("#00FAD9")
+                .setTitle(`XP de : ${message.author.username}`) 
+                .setDescription(`Tu as actuellement : ${xpfinal[1]} xp`)
+            message.channel.send({embed: xp_embed});
+        }
+    }
+
+});
+
+//shop xp
+bot.on("message", function(message) {
+    if (message.author.equals(bot.user)) return;
+
+    if (!message.content.startsWith(PREFIX)) return;
+
+    var args = message.content.substring(PREFIX.length).split(" ");
+    var msgauthor = message.author.id;
+
+    switch (args[0].toLowerCase()){
+    
+        case "shop":
+            var shop_embed = new Discord.RichEmbed()
+                .setColor("#FAFA00")
+                .setAuthor("HyperionPE shop - Money Utilisé : XP")
+                .addBlankField(inline = false)
+                .setDescription("Voici le shop du BOT tu peut acheter des items ou grades(pour les grades c'est encore en dev !)")
+                .addField("Items:" , "**test** : [2XP][ID: test] desc: test")
+                .setFooter("La commande pour acheter: -buyitem (ID de l'item).")
+            message.channel.send({embed: shop_embed});
+
+        break;
+
+        case "buyitem":
+            var itembuying = message.content.substr(9);
+            if (!itembuying){
+                itembuying = "indéterminé !";
+            }else{
+                console.log(`ShopLogs: Demande d'achat d'item : ${itembuying}`)
+                if(storedb.get("shop_items").find({itemID: itembuying}).value()){
+                    console.log("Item Trouvé")
+                    var info = storedb.get("shop_items").filter({itemID: itembuying}).find("name", "desc").value();
+                    var iteminfo = Object.values(info);
+                    console.log(iteminfo);
+                    var buy_embed = new Discord.RichEmbed()
+                        .setColor("#F05800")
+                        .setAuthor("HyparionPE Shop - Facture D'achat")
+                        .setDescription("*Attention, ceci est une facture d'achat, Merci de votre achat !*")
+                        .addField("Infos :", `**ID:** [${iteminfo[0]}]\n**Nom:** [${iteminfo[1]}]\n**Description:** [${iteminfo[2]}]\n**Prix:** [${iteminfo[3]}]`)
+                    message.author.send({embed: buy_embed});
+
+                    var useritem = db.get("inventory").filter({user: msgauthor}).find("items").value();
+                    var itemsdb = Object.values(useritem);
+                    var userxpdb = db.get("xp").filter({user: msgauthor}).find("xp").value();
+                    var userxp = Object.values(userxpdb);
+
+                    if (userxp[1] >= iteminfo[3]){
+                        message.reply(`**Info: ** Votre achat (${iteminfo[1]}) a été accepté. Retrait de ${iteminfo[3]} XP`)
+                        if (!db.get("inventory").filter({user: msgauthor}).find({items: "Vide"}).value()){
+                            console.log("inventaire pas vide !");
+                            db.get("xp").find({user: msgauthor}).find("xp").assign({user: msgauthor, xp: userxp[1] -= iteminfo[3]}).write();
+                            db.get("inventory").filter({user: msgauthor}).find("items").assign({user: msgauthor, items: itemsdb[1] + " , " + iteminfo[1]}).write();
+                        }else{
+                            console.log("inventaire vide !");
+                            db.get("xp").find({user: msgauthor}).find("xp").assign({user: msgauthor, xp: userxp[1] -= iteminfo[3]}).write();
+                            db.get("inventory").filter({user: msgauthor}).find("items").assign({user: msgauthor, items: iteminfo[1]}).write();
+                        }
+                    }else{
+                        message.reply("Erreur ! Achat impossible tu n'as pas assez d'xp !");
+                    }
+                    
+                }
+            }
+
+        break;
+    }
+});

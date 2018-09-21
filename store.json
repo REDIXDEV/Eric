@@ -1,0 +1,10 @@
+{
+    "store_item": [
+      {
+        "itemID": "kebab",
+        "name": "Kebab",
+        "desc": "Un bon Kebab sa mere !",
+        "price": "5"
+      }
+    ]
+  }

@@ -1,0 +1,49 @@
+//let logs = guild.channel.find("name", "logs");
+//var logs_embed = new Discord.RichEmbed();
+            //.setColor("#F70010")
+           // .setAuthor("LOGS", icon)
+            //.addField("Utilisateur :", `**${message.author.username}**`)
+            //.addField("Commande éxécuté :", `**${args}**`)
+            //.addField("Channel :", `**${message.channel.name}**`)
+        //bot.channels.get(logs).send(logs_embed);
+
+
+
+
+//help
+//bot.on("message" , message => {
+    if (message.content === prefix + "help"){
+        var args = message.content.split(' ').join(' ').slice(0);
+        var icon = bot.user.avatarURL;
+        var help_embed = new Discord.RichEmbed()
+            .setColor('#FA8E00')
+            .setThumbnail(bot.user.avatarURL)
+            .addField(":black_circle: Voici mes catégories de commandes : :black_circle:", "(La commande [-mod] n'est disponible seulement pour les personne du staff !)")
+            .addField(":tools: Modération","Fais -mod pour voir les commandes de modérations ! (STAFF)")
+            .addField(":fries: Commandes de base","Fais -bas pour voir les commandes de base !")
+            .addField(":tada:  Fun","Fais -fun pour voir les commandes fun !")
+            .setFooter("Menu d'aide - Bot crée par R ? D I X™#6666", icon, timestamp = new Date())
+            .setTimestamp(timestamp = new Date())
+        message.channel.sendEmbed(help_embed);
+        let logs = server.channel.find("name", "logs");
+        var args = message.content.split(' ').join(' ').slice(0);
+        var logs_embed = new Discord.RichEmbed()
+            .setColor("#F70010")
+            .setAuthor("LOGS", icon)
+            .addField("Utilisateur :", `**${message.author.username}**`)
+            .addField("Commande éxécuté :", `**${args}**`)
+            .addField("Channel :", `**${message.channel.name}**`)
+        bot.channels.get("logs").send(logs_embed);
+        //message.channel.get("logs").send(`**LOGS**: L'utilisateurs **${message.author.username}** a fais la commande **${args}** dans le channel **${message.channel.name}** !`);
+    }
+//});
+
+let logs = server.channel.find("name", "logs");
+        var args = message.content.split(' ').join(' ').slice(0);
+        var logs_embed = new Discord.RichEmbed()
+            .setColor("#F70010")
+            .setAuthor("LOGS", icon)
+            .addField("Utilisateur :", `**${message.author.username}**`)
+            .addField("Commande éxécuté :", `**${args}**`)
+            .addField("Channel :", `**${message.channel.name}**`)
+        bot.channels.get("logs").send(logs_embed);

@@ -1,0 +1,113 @@
+bot.on("message" , message => {
+    if (message.content === prefix + "test"){
+        var help_embed = new Discord.RichEmbed()
+            .setColor('#E80000')
+            .addField("Bot de test", "lol")
+            .setFooter("Bot Crée par equipe dev")
+        message.channel.sendEmbed(help_embed);
+    }
+});
+
+bot.on("message", function(message) {
+    if (message.author.equals(bot.user)) return;
+
+    if (!message.content.startsWith(PREFIX)) return;
+
+    var args = message.content.substring(PREFIX.length).split(" ");
+
+    switch (args[0].toLowerCase()){
+        case "lol":
+            //var name = message.author.name;
+            var icon = bot.user.avatarURL;
+            var embed = new Discord.RichEmbed()
+                .setColor("#E80000")
+                .setTitle("**Embed TEST**")
+                .addBlankField(inline = false)
+                .addField("Commande", "test", true)
+                .addField("Commande", "test", true)
+                .setThumbnail(bot.user.avatarURL)
+                .setTimestamp(timestamp = new Date())
+                .addBlankField(inline = false)
+                .setAuthor("Embed test", icon)
+                .setFooter("Embed test", icon, timestamp = new Date())
+            message.channel.sendEmbed(embed);
+        break;
+    }
+});
+
+bot.on('message', async msg => {
+    if (msg.author.bot) return undefined;
+    if (!msg.content.startsWith(prefix)) return undefined;
+    const args = msg.content.split(' ');
+    const serverQueue = queue.get(msg.guild.id);
+   
+    if (msg.content.startsWith(`${prefix}play`)) {
+        const voiceChannel = msg.member.voiceChannel;
+        if (!voiceChannel) return msg.channel.send("Désolé, mais il faut que vous soyez dans un salon vocal pour pouvoir lancer de la musique.");
+        const permission = voiceChannel.permissionsFor(msg.client.user);
+        if (!permission.has('CONNECT')) {
+            return msg.channel.send("Je n'ai pas les permissions neccsaires pour vous rejoindre.");
+ 
+        }
+        if (!permission.has('SPEAK')) {
+            return msg.channel.send("Je n'ai pas les permissions neccesaires pour vous jouer de la musique.");
+        }
+        const songInfo = await ytdl.getInfo(args[1]);
+        const song = {
+            title: songInfo.title,
+            url : songInfo.video_url
+        };
+        if (!serverQueue) {
+            const queueConstruct = {
+                textChannel: msg.channel,
+                voiceChannel : voiceChannel,
+                connection: null,
+                songs : [],
+                playing : true
+            };
+            queue.set(msg.guild.id, queueConstruct);
+ 
+            queueConstruct.songs.push(songs);
+        }
+        try {
+            var connection = await voiceChannel.join();
+            queueConstruct.connection = connection;
+            play(msg.guild, queueConstruct.songs[0]);
+        } catch (error) {
+            console.error(`${error}`);
+            return msg.channel.send(`Je ne peut pas rejoindre le salon vocal ${error}`);
+            queue.delete(msg.guild.id);
+            console.error(`Je n'ai pas pu rejoindre un salon vocal ${error}`);
+        
+        //}else{
+            serverQueue.songs.push(song);
+            return msg.channel.send(`**${song.title} a bien été ajoutée a la queue.**`);
+        }
+            return undefined;
+        }else{
+            if (msg.content.startsWith(`${prefix}stop`)) {
+            if (!msg.member.voiceChannel) return msg.channel.send("Tu n'est pas dans un salon vocal.")
+            msg.member.voiceChannel.leave();
+        }
+    }
+});
+
+function play(guild, song) {
+    const serverQueue = queue.get(guild.id);
+ 
+    if (!!songs) {
+        serverQueue.voiceChannel.leave()
+        queue.delete(guild.id);
+        return;
+    }
+ 
+    const dispatcher = serverQueue.connection.playStream(ytdl(song.url));
+    dispatcher.on('end', () => {
+        console.log("Fini");
+        serverQueue.songs.shift();
+        play(guild, serverQueue.songs[0]);
+    });
+    dispatcher.on('error', error => console.error(error));
+    dispatcher.setVolumeLogarithmic(5 / 5);
+}
+
